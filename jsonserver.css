@@ -1,0 +1,15 @@
+.disabled {
+    opacity: .6;
+}
+
+.my-input {
+    margin-bottom: 20px;
+}
+
+.myPlusBtn {
+    width: 100%;
+}
+
+.fa-plus {
+    margin-top: 3px;
+}

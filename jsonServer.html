@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="jsonserver.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">JsonServer</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#">Separated link</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#">One more separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <form class="navbar-form navbar-left">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search">
+                    </div>
+                    <button type="submit" class="btn btn-default">Submit</button>
+                </form>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">Link</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#">Separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+    <div id="app" class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <h3 class="page-header "><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Modify</h3>
+                <label for="">店名</label>
+                <input v-model="newRecord.name" class="form-control my-input" type="text" placeholder="請輸入...">
+                <label for="">地址</label>
+                <input v-model="newRecord.add" class="form-control my-input" type="text" placeholder="請輸入...">
+                <label for="">說明</label>
+                <input v-model="newRecord.description" class="form-control my-input" type="text" placeholder="請輸入...">
+                <label for="">價格</label>
+                <input v-model="newRecord.price" class="form-control my-input" type="text" placeholder="請輸入...">
+                <button @click=increase() class="btn btn-primary myPlusBtn" :class="{disabled: ajaxing}" type="">新增資料<i class="fa fa-plus pull-right" aria-hidden="true"></i></button>
+            </div>
+            <!--right -->
+            <div class="col-md-9">
+                <h3 class="page-header"><i class="fa fa-table" aria-hidden="true"></i> Information</h3>
+                <table class="table table-bordered table-responsive table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Add</th>
+                            <th>Price</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="restaurant in restaurants">
+                            <td>{{ restaurant.id }}</td>
+                            <td>{{ restaurant.name }}</td>
+                            <td>{{ restaurant.add }}</td>
+                            <td>$ {{ restaurant.price }}</td>
+                            <td @click="showRestaurant(restaurant)" :class="{disabled: ajaxing}"><i class="fa fa-info-circle" aria-hidden="true"></i> detail</i>
+                            </td>
+                            <td @click="modifyRestaurant(restaurant)" :class="{disabled: ajaxing}"><i class="fa fa-pencil-square" aria-hidden="true"> modify</i>
+                            </td>
+                            <td @click="decrease(restaurant)" :class="{disabled: ajaxing}"><i class="fa fa-trash" aria-hidden="true"></i> 刪除</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- detail -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Restaurant's Detail</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div v-if="currentRestaurant">
+                            <h4>{{ currentRestaurant.name }}  /  {{ currentRestaurant.add }}</h4>
+                            <p>{{ currentRestaurant.description }}</p>
+                            <p><b>$ {{ currentRestaurant.price }}</b></p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- modify -->
+        <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content" v-if="currentRestaurant">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modify</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="">店名</label>
+                        <input v-model="currentRestaurant.name" class="form-control my-input" type="text">
+                        <label for="">地址</label>
+                        <input v-model="currentRestaurant.add" class="form-control my-input" type="text">
+                        <label for="">說明</label>
+                        <input v-model="currentRestaurant.description" class="form-control my-input" type="text">
+                        <label for="">價格</label>
+                        <input v-model="currentRestaurant.price" class="form-control my-input" type="text">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="butto typen" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button @click="updateRestaurant(currentRestaurant)" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="jsonserver.js" type="text/javascript" charset="utf-8" async defer></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</html>
